@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:anroid="http://schemas.android.com/apk/res/android"
+    anroid:layout_width="match_parent"
+    anroid:layout_height="match_parent"
+    anroid:orientation="vertical">
+
+    <android.support.design.widget.TabLayout
+        anroid:id="@+id/tabLayout"
+        anroid:layout_width="match_parent"
+        anroid:layout_height="wrap_content"
+        anroid:background="#ffffff" />
+
+    <android.support.v4.view.ViewPager
+        anroid:id="@+id/viewPager"
+        anroid:layout_width="match_parent"
+        anroid:layout_height="0dp"
+        anroid:layout_weight="1" />
+
+</LinearLayout>
