@@ -41,10 +41,6 @@ public class TomorrowFrag extends Fragment {
     private ItemAdapter3 adapter3;
     private Day tomorrow;
     private MyDatabase database;
-    public int lyear;
-    public int lmonth;
-    public int ldate;
-    private boolean changed = false;
     public void setDatabase(MyDatabase database) {
         this.database = database;
     }
@@ -62,36 +58,30 @@ public class TomorrowFrag extends Fragment {
 
     private void initData() {
         tomorrow = new Day();
-        tomorrow.name = "tomorrow";
         SQLiteDatabase data = database.getWritableDatabase();
         Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1);
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int date = calendar.get(Calendar.DATE);
-        Cursor cursor;
-        if (lyear > year && ldate == 31 && date == 1) {
-            cursor = null;
-            changed = true;
-        } else if (lyear == year && lmonth > month) {
-            cursor = null;
-            changed = true;
-        } else if (lyear == year && lmonth == month && ldate > date) {
-            cursor = null;
-            changed = true;
-        } else cursor = data.query("tomorrow", null, null, null,
+        tomorrow.setDate(year, month, date);
+        Cursor cursor = data.query("day", null, null, null,
                 null, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    String time = cursor.getString(cursor.getColumnIndex("time"));
-                    boolean checked = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex("checked")));
-                    String content = cursor.getString(cursor.getColumnIndex("content"));
-                    if (time.equals("上午"))
-                        tomorrow.getMorning().add(new Item(checked, content));
-                    else if (time.equals("下午"))
-                        tomorrow.getAfternoon().add(new Item(checked, content));
-                    else if (time.equals("晚上"))
-                        tomorrow.getEvening().add(new Item(checked, content));
+                    String dateid = cursor.getString(cursor.getColumnIndex("dateid"));
+                    if (dateid.equals(tomorrow.getDate())) {
+                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                        boolean checked = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex("checked")));
+                        String content = cursor.getString(cursor.getColumnIndex("content"));
+                        if (time.equals("上午"))
+                            tomorrow.getMorning().add(new Item(checked, content));
+                        else if (time.equals("下午"))
+                            tomorrow.getAfternoon().add(new Item(checked, content));
+                        else if (time.equals("晚上"))
+                            tomorrow.getEvening().add(new Item(checked, content));
+                    }
                 } while (cursor.moveToNext());
             }
         }
@@ -166,31 +156,34 @@ public class TomorrowFrag extends Fragment {
                     tomorrow.getMorning().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", tomorrow.getDate());
                     values.put("time", "上午");
                     values.put("time_id", tomorrow.getMorning().size() + "m");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("tomorrow", null, values);
+                    db.insert("day", null, values);
                     adapter1.notifyItemInserted(tomorrow.getMorning().size());
                 } else if (time.equals("下午")) {
                     tomorrow.getAfternoon().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", tomorrow.getDate());
                     values.put("time", "下午");
                     values.put("time_id", tomorrow.getAfternoon().size() + "a");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("tomorrow", null, values);
+                    db.insert("day", null, values);
                     adapter2.notifyItemInserted(tomorrow.getAfternoon().size());
                 } else if (time.equals("晚上")) {
                     tomorrow.getEvening().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", tomorrow.getDate());
                     values.put("time", "晚上");
                     values.put("time_id", tomorrow.getEvening().size() + "e");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("tomorrow", null, values);
+                    db.insert("day", null, values);
                     adapter3.notifyItemInserted(tomorrow.getEvening().size());
                 }
             }
@@ -208,34 +201,4 @@ public class TomorrowFrag extends Fragment {
         actionButton3.setVisibility(View.INVISIBLE);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (changed) {
-            SQLiteDatabase data = database.getWritableDatabase();
-            ContentValues values = new ContentValues();
-            data.delete("tomorrow", null, null);
-            for (int i = 0; i < tomorrow.getMorning().size(); i++) {
-                values.put("time", "上午");
-                values.put("time_id", i + 1 + "m");
-                values.put("checked", tomorrow.getMorning().get(i).isChecked()+"");
-                values.put("content", tomorrow.getMorning().get(i).getText());
-                data.insert("tomorrow", null, values);
-            }
-            for (int i = 0; i < tomorrow.getAfternoon().size(); i++) {
-                values.put("time", "下午");
-                values.put("time_id", i + 1 + "a");
-                values.put("checked", tomorrow.getAfternoon().get(i).isChecked()+"");
-                values.put("content", tomorrow.getAfternoon().get(i).getText());
-                data.insert("tomorrow", null, values);
-            }
-            for (int i = 0; i < tomorrow.getEvening().size(); i++) {
-                values.put("time", "晚上");
-                values.put("time_id", i + 1 + "e");
-                values.put("checked", tomorrow.getEvening().get(i).isChecked()+"");
-                values.put("content", tomorrow.getEvening().get(i).getText());
-                data.insert("tomorrow", null, values);
-            }
-        }
-    }
 }

@@ -7,48 +7,32 @@ public class Day {
     private int year;
     private int date;
     private int month;
-    public String name;
     private List<Item> morning = new ArrayList<>();
     private List<Item> afternoon = new ArrayList<>();
     private List<Item> evening = new ArrayList<>();
 
-    public int getDate() {
-        return date;
+    public String getDate() {
+        return year + month + date + "";
     }
 
-    public void setDate(int date) {
-        this.date = date;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public void setMonth(int month) {
+    public void setDate(int year, int month, int date) {
+        this.year = year;
         this.month = month;
+        this.date = date;
     }
 
     public List<Item> getMorning() {
         return morning;
     }
 
-    public void setMorning(List<Item> morning) {
-        this.morning = morning;
-    }
 
     public List<Item> getAfternoon() {
         return afternoon;
     }
 
-    public void setAfternoon(List<Item> afternoon) {
-        this.afternoon = afternoon;
-    }
 
     public List<Item> getEvening() {
         return evening;
     }
 
-    public void setEvening(List<Item> evening) {
-        this.evening = evening;
-    }
 }

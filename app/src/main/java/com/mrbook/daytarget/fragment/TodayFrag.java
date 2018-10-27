@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -42,10 +43,6 @@ public class TodayFrag extends Fragment {
     private ItemAdapter3 adapter3;
     private Day today;
     private MyDatabase database;
-    public int lyear;
-    public int lmonth;
-    public int ldate;
-    private boolean changed = false;
     public void setDatabase(MyDatabase database) {
         this.database = database;
     }
@@ -63,40 +60,28 @@ public class TodayFrag extends Fragment {
 
     private void initData() {
         today = new Day();
-        today.name = "today";
         SQLiteDatabase data = database.getWritableDatabase();
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int date = calendar.get(Calendar.DATE);
-        Cursor cursor;
-        if (lyear > year && ldate == 31 && date == 1) {
-            cursor = data.query("tomorrow", null, null, null,
-                    null, null, null);
-            changed = true;
-        } else if (lyear == year && lmonth > month) {
-            cursor = data.query("tomorrow", null, null, null,
-                    null, null, null);
-            changed = true;
-        } else if (lyear == year && lmonth == month && ldate > date) {
-            cursor = data.query("tomorrow", null, null, null,
-                    null, null, null);
-            changed = true;
-        } else cursor = data.query(today.name, null, null, null,
+        today.setDate(year, month, date);
+        Cursor cursor = data.query("day", null, null, null,
                 null, null, null);
-
-
         if (cursor.moveToFirst()) {
             do {
-                String time = cursor.getString(cursor.getColumnIndex("time"));
-                boolean checked = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex("checked")));
-                String content = cursor.getString(cursor.getColumnIndex("content"));
-                if (time.equals("上午"))
-                    today.getMorning().add(new Item(checked, content));
-                else if (time.equals("下午"))
-                    today.getAfternoon().add(new Item(checked, content));
-                else if (time.equals("晚上"))
-                    today.getEvening().add(new Item(checked, content));
+                String dateid = cursor.getString(cursor.getColumnIndex("dateid"));
+                if (dateid.equals(today.getDate())) {
+                    String time = cursor.getString(cursor.getColumnIndex("time"));
+                    boolean checked = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex("checked")));
+                    String content = cursor.getString(cursor.getColumnIndex("content"));
+                    if (time.equals("上午"))
+                        today.getMorning().add(new Item(checked, content));
+                    else if (time.equals("下午"))
+                        today.getAfternoon().add(new Item(checked, content));
+                    else if (time.equals("晚上"))
+                        today.getEvening().add(new Item(checked, content));
+                }
             } while (cursor.moveToNext());
         }
     }
@@ -128,6 +113,7 @@ public class TodayFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 if (actionButton1.getVisibility() == View.INVISIBLE) {
+                    actionButton.setImageDrawable();
                     actionButton1.setVisibility(View.VISIBLE);
                     actionButton2.setVisibility(View.VISIBLE);
                     actionButton3.setVisibility(View.VISIBLE);
@@ -170,31 +156,34 @@ public class TodayFrag extends Fragment {
                     today.getMorning().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", today.getDate());
                     values.put("time", "上午");
                     values.put("time_id", today.getMorning().size() + "m");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("today", null, values);
+                    db.insert("day", null, values);
                     adapter1.notifyItemInserted(today.getMorning().size());
                 } else if (time.equals("下午")) {
                     today.getAfternoon().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", today.getDate());
                     values.put("time", "下午");
                     values.put("time_id", today.getAfternoon().size() + "a");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("today", null, values);
+                    db.insert("day", null, values);
                     adapter2.notifyItemInserted(today.getAfternoon().size());
                 } else if (time.equals("晚上")) {
                     today.getEvening().add(new Item(false, s));
                     SQLiteDatabase db = database.getWritableDatabase();
                     ContentValues values = new ContentValues();
+                    values.put("dateid", today.getDate());
                     values.put("time", "晚上");
                     values.put("time_id", today.getEvening().size() + "e");
                     values.put("checked", "false");
                     values.put("content", s);
-                    db.insert("today", null, values);
+                    db.insert("day", null, values);
                     adapter3.notifyItemInserted(today.getEvening().size());
                 }
             }
@@ -210,36 +199,5 @@ public class TodayFrag extends Fragment {
         actionButton1.setVisibility(View.INVISIBLE);
         actionButton2.setVisibility(View.INVISIBLE);
         actionButton3.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (changed) {
-            SQLiteDatabase data = database.getWritableDatabase();
-            ContentValues values = new ContentValues();
-            data.delete("today", null, null);
-            for (int i = 0; i < today.getMorning().size(); i++) {
-                values.put("time", "上午");
-                values.put("time_id", i + 1 + "m");
-                values.put("checked", today.getMorning().get(i).isChecked()+"");
-                values.put("content", today.getMorning().get(i).getText());
-                data.insert("today", null, values);
-            }
-            for (int i = 0; i < today.getAfternoon().size(); i++) {
-                values.put("time", "下午");
-                values.put("time_id", i + 1 + "a");
-                values.put("checked", today.getAfternoon().get(i).isChecked()+"");
-                values.put("content", today.getAfternoon().get(i).getText());
-                data.insert("today", null, values);
-            }
-            for (int i = 0; i < today.getEvening().size(); i++) {
-                values.put("time", "晚上");
-                values.put("time_id", i + 1 + "e");
-                values.put("checked", today.getEvening().get(i).isChecked()+"");
-                values.put("content", today.getEvening().get(i).getText());
-                data.insert("today", null, values);
-            }
-        }
     }
 }

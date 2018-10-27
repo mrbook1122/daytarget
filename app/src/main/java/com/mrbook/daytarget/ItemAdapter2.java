@@ -36,7 +36,8 @@ public class ItemAdapter2 extends RecyclerView.Adapter<ItemAdapter2.ViewHolder> 
         SQLiteDatabase db = database.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("checked", checked + "");
-        db.update(day.name, values, "time_id = ?", new String[] {position+1+"a"});
+        db.update("day", values, "dateid = ? and time_id = ?", new String[] {day.getDate(),
+                position+1+"a"});
         if (checked) {
             holder.textView.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG);
             holder.checkBox.setChecked(checked);
