@@ -2,6 +2,8 @@ package com.mrbook.daytarget;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -19,10 +22,11 @@ import java.util.List;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     private Day day;
     private MyDatabase database;
-
-    public ItemAdapter(Day day, MyDatabase database) {
+    private Context context;
+    public ItemAdapter(Day day, MyDatabase database, Context context) {
         this.day = day;
         this.database = database;
+        this.context = context;
     }
 
     @NonNull
@@ -38,7 +42,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         List<Item> morning = day.getMorning();
         boolean checked = morning.get(position).isChecked();
         SQLiteDatabase db = database.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        final ContentValues values = new ContentValues();
         values.put("checked", checked + "");
         db.update("day", values, "dateid = ? and time_id = ?", new String[] {day.getDate(),
                 position+1+"m"});
@@ -64,7 +68,44 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("修改");
+                final EditText editText = new EditText(context);
+                editText.setText(holder.textView.getText());
+                builder.setView(editText);
+                builder.setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SQLiteDatabase data = database.getWritableDatabase();
+                        ContentValues val = new ContentValues();
+                        val.put("content", editText.getText().toString());
+                        data.update("day", val, "dateid = ? and time_id = ?",
+                                new String[] {day.getDate(), ps + 1 + "m"});
+                        day.getMorning().get(ps).setText(editText.getText().toString());
+                        data.close();
+                        notifyItemChanged(ps);
+                    }
+                });
+                builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+                builder.setNeutralButton("删除", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SQLiteDatabase data = database.getWritableDatabase();
+                        data.delete("day", "dateid = ? and time_id = ?",
+                                new String[] {day.getDate(), ps + 1 + "m"});
+                        day.getMorning().remove(ps);
+                        data.close();
+                        notifyItemRemoved(ps);
+
+                    }
+                });
+                builder.show();
+                return false;
             }
         });
     }

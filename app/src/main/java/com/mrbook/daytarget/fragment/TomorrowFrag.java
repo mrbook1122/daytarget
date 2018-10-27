@@ -85,6 +85,7 @@ public class TomorrowFrag extends Fragment {
                 } while (cursor.moveToNext());
             }
         }
+        data.close();
     }
 
     private void initComponent(View view) {
@@ -98,7 +99,7 @@ public class TomorrowFrag extends Fragment {
     }
 
     private void init() {
-        adapter1 = new ItemAdapter(tomorrow, database);
+        adapter1 = new ItemAdapter(tomorrow, database, getActivity());
         recyclerView1.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView1.setAdapter(adapter1);
         adapter2 = new ItemAdapter2(tomorrow, database);
@@ -164,6 +165,7 @@ public class TomorrowFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter1.notifyItemInserted(tomorrow.getMorning().size());
                 } else if (time.equals("下午")) {
                     tomorrow.getAfternoon().add(new Item(false, s));
@@ -175,6 +177,7 @@ public class TomorrowFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter2.notifyItemInserted(tomorrow.getAfternoon().size());
                 } else if (time.equals("晚上")) {
                     tomorrow.getEvening().add(new Item(false, s));
@@ -186,6 +189,7 @@ public class TomorrowFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter3.notifyItemInserted(tomorrow.getEvening().size());
                 }
             }

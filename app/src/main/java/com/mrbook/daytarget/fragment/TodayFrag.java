@@ -84,6 +84,7 @@ public class TodayFrag extends Fragment {
                 }
             } while (cursor.moveToNext());
         }
+        data.close();
     }
 
     private void initComponent(View view) {
@@ -97,7 +98,7 @@ public class TodayFrag extends Fragment {
     }
 
     private void init() {
-        adapter1 = new ItemAdapter(today, database);
+        adapter1 = new ItemAdapter(today, database, getActivity());
         recyclerView1.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView1.setAdapter(adapter1);
         adapter2 = new ItemAdapter2(today, database);
@@ -166,6 +167,7 @@ public class TodayFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter1.notifyItemInserted(today.getMorning().size());
                 } else if (time.equals("下午")) {
                     today.getAfternoon().add(new Item(false, s));
@@ -177,6 +179,7 @@ public class TodayFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter2.notifyItemInserted(today.getAfternoon().size());
                 } else if (time.equals("晚上")) {
                     today.getEvening().add(new Item(false, s));
@@ -188,6 +191,7 @@ public class TodayFrag extends Fragment {
                     values.put("checked", "false");
                     values.put("content", s);
                     db.insert("day", null, values);
+                    db.close();
                     adapter3.notifyItemInserted(today.getEvening().size());
                 }
             }

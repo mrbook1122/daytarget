@@ -12,7 +12,7 @@ public class Day {
     private List<Item> evening = new ArrayList<>();
 
     public String getDate() {
-        return year + month + date + "";
+        return year * 10000 + month *100 + date + "";
     }
 
     public void setDate(int year, int month, int date) {

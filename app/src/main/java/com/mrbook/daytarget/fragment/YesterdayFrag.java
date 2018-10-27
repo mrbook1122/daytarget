@@ -86,7 +86,7 @@ public class YesterdayFrag extends Fragment {
     }
 
     private void init() {
-        adapter1 = new ItemAdapter(yesterday, database);
+        adapter1 = new ItemAdapter(yesterday, database, getActivity());
         recyclerView1.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView1.setAdapter(adapter1);
         adapter2 = new ItemAdapter2(yesterday, database);
