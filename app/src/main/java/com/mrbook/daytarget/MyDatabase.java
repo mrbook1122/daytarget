@@ -25,6 +25,11 @@ public class MyDatabase extends SQLiteOpenHelper {
             "time_id text, " +
             "checked text, " +
             "content text)";
+    public static final String CREATE_TIME = "create table time (" +
+            "id integer primary key autoincrement, " +
+            "year text, " +
+            "month text, " +
+            "mydate text)";
     public MyDatabase(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
         mContext = context;
@@ -35,6 +40,7 @@ public class MyDatabase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TODAY);
         sqLiteDatabase.execSQL(CREATE_YESTERDAY);
         sqLiteDatabase.execSQL(CREATE_TOMORROW);
+        sqLiteDatabase.execSQL(CREATE_TIME);
     }
 
     @Override

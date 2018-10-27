@@ -1,5 +1,6 @@
 package com.mrbook.daytarget.fragment;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -21,6 +22,8 @@ import com.mrbook.daytarget.ItemAdapter3;
 import com.mrbook.daytarget.MyDatabase;
 import com.mrbook.daytarget.R;
 
+import java.util.Calendar;
+
 public class YesterdayFrag extends Fragment {
     private RecyclerView recyclerView1;
     private RecyclerView recyclerView2;
@@ -31,7 +34,10 @@ public class YesterdayFrag extends Fragment {
     private ItemAdapter3 adapter3;
     private Day yesterday;
     private MyDatabase database;
-
+    public int lyear;
+    public int lmonth;
+    public int ldate;
+    private boolean changed = false;
     public void setDatabase(MyDatabase database) {
         this.database = database;
     }
@@ -50,7 +56,24 @@ public class YesterdayFrag extends Fragment {
         yesterday = new Day();
         yesterday.name = "yesterday";
         SQLiteDatabase data = database.getWritableDatabase();
-        Cursor cursor = data.query("yesterday", null, null, null,
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int date = calendar.get(Calendar.DATE);
+        Cursor cursor;
+        if (lyear > year && ldate == 31 && date == 1) {
+            cursor = data.query("today", null, null, null,
+                    null, null, null);
+            changed = true;
+        } else if (lyear == year && lmonth > month) {
+            cursor = data.query("today", null, null, null,
+                    null, null, null);
+            changed = true;
+        } else if (lyear == year && lmonth == month && ldate > date) {
+            cursor = data.query("today", null, null, null,
+                    null, null, null);
+            changed = true;
+        } else cursor = data.query("yesterday", null, null, null,
                 null, null, null);
         if (cursor.moveToFirst()) {
             do {
@@ -87,4 +110,34 @@ public class YesterdayFrag extends Fragment {
         recyclerView3.setAdapter(adapter3);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (changed) {
+            SQLiteDatabase data = database.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            data.delete("yesterday", null, null);
+            for (int i = 0; i < yesterday.getMorning().size(); i++) {
+                values.put("time", "上午");
+                values.put("time_id", i + 1 + "m");
+                values.put("checked", yesterday.getMorning().get(i).isChecked()+"");
+                values.put("content", yesterday.getMorning().get(i).getText());
+                data.insert("yesterday", null, values);
+            }
+            for (int i = 0; i < yesterday.getAfternoon().size(); i++) {
+                values.put("time", "下午");
+                values.put("time_id", i + 1 + "a");
+                values.put("checked", yesterday.getAfternoon().get(i).isChecked()+"");
+                values.put("content", yesterday.getAfternoon().get(i).getText());
+                data.insert("yesterday", null, values);
+            }
+            for (int i = 0; i < yesterday.getEvening().size(); i++) {
+                values.put("time", "晚上");
+                values.put("time_id", i + 1 + "e");
+                values.put("checked", yesterday.getEvening().get(i).isChecked()+"");
+                values.put("content", yesterday.getEvening().get(i).getText());
+                data.insert("yesterday", null, values);
+            }
+        }
+    }
 }

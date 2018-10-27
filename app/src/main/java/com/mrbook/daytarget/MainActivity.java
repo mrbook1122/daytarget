@@ -1,5 +1,8 @@
 package com.mrbook.daytarget;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,7 +26,12 @@ public class MainActivity extends AppCompatActivity {
     private List<Fragment> fragments;
     private List<String> titles;
     private PagerAdapter adapter;
-
+    private int lyear;
+    private int lmonth;
+    private int ldate;
+    private int year;
+    private int month;
+    private int date;
     private MyDatabase database;
 
 
@@ -43,6 +51,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+        SQLiteDatabase data = database.getWritableDatabase();
+        Cursor cursor = data.query("time", null, null,null, null,
+                null,null,null);
+        Calendar calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH) + 1;
+        date = calendar.get(Calendar.DATE);
+        if (cursor.moveToFirst()) {
+            do {
+                lyear = Integer.parseInt(cursor.getString(cursor.getColumnIndex("year")));
+                lmonth = Integer.parseInt(cursor.getString(cursor.getColumnIndex("month")));
+                ldate = Integer.parseInt(cursor.getString(cursor.getColumnIndex("mydate")));
+            } while (cursor.moveToNext());
+        } else {
+            lyear = year;
+            lmonth = month;
+            ldate = date;
+        }
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
         titles = new ArrayList<>();
@@ -54,8 +80,18 @@ public class MainActivity extends AppCompatActivity {
         TodayFrag todayFrag = new TodayFrag();
         TomorrowFrag tomorrowFrag = new TomorrowFrag();
         yesterdayFrag.setDatabase(database);
+        yesterdayFrag.lyear = lyear;
+        yesterdayFrag.lmonth = lmonth;
+        yesterdayFrag.ldate = ldate;
         todayFrag.setDatabase(database);
+        todayFrag.lyear = lyear;
+        todayFrag.lmonth = lmonth;
+        todayFrag.ldate = ldate;
         tomorrowFrag.setDatabase(database);
+        tomorrowFrag.lyear = lyear;
+        tomorrowFrag.lmonth = lmonth;
+        tomorrowFrag.ldate = ldate;
+
         fragments.add(yesterdayFrag);
         fragments.add(todayFrag);
         fragments.add(tomorrowFrag);
@@ -64,10 +100,26 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int date = calendar.get(Calendar.DATE);
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SQLiteDatabase data = database.getWritableDatabase();
+        Cursor cursor = data.query("time", null, null,null, null,
+                null,null,null);
+        if (!cursor.moveToFirst()) {
+            ContentValues values = new ContentValues();
+            values.put("year", year);
+            values.put("month", month);
+            values.put("mydate", date);
+            data.insert("time", null, values);
+        }
+        ContentValues values = new ContentValues();
+        values.put("year", year);
+        values.put("month", month);
+        values.put("mydate", date);
+        data.update("time", values, null, null);
+    }
 }

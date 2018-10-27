@@ -42,10 +42,10 @@ public class TodayFrag extends Fragment {
     private ItemAdapter3 adapter3;
     private Day today;
     private MyDatabase database;
-    private int lyear;
-    private int lmonth;
-    private int ldate;
-
+    public int lyear;
+    public int lmonth;
+    public int ldate;
+    private boolean changed = false;
     public void setDatabase(MyDatabase database) {
         this.database = database;
     }
@@ -71,15 +71,21 @@ public class TodayFrag extends Fragment {
         int date = calendar.get(Calendar.DATE);
         Cursor cursor;
         if (lyear > year && ldate == 31 && date == 1) {
-            
-        }
-            cursor = data.query(today.name, null, null, null,
+            cursor = data.query("tomorrow", null, null, null,
                     null, null, null);
-
-
-
-        cursor = data.query(today.name, null, null, null,
+            changed = true;
+        } else if (lyear == year && lmonth > month) {
+            cursor = data.query("tomorrow", null, null, null,
+                    null, null, null);
+            changed = true;
+        } else if (lyear == year && lmonth == month && ldate > date) {
+            cursor = data.query("tomorrow", null, null, null,
+                    null, null, null);
+            changed = true;
+        } else cursor = data.query(today.name, null, null, null,
                 null, null, null);
+
+
         if (cursor.moveToFirst()) {
             do {
                 String time = cursor.getString(cursor.getColumnIndex("time"));
@@ -206,4 +212,34 @@ public class TodayFrag extends Fragment {
         actionButton3.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (changed) {
+            SQLiteDatabase data = database.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            data.delete("today", null, null);
+            for (int i = 0; i < today.getMorning().size(); i++) {
+                values.put("time", "上午");
+                values.put("time_id", i + 1 + "m");
+                values.put("checked", today.getMorning().get(i).isChecked()+"");
+                values.put("content", today.getMorning().get(i).getText());
+                data.insert("today", null, values);
+            }
+            for (int i = 0; i < today.getAfternoon().size(); i++) {
+                values.put("time", "下午");
+                values.put("time_id", i + 1 + "a");
+                values.put("checked", today.getAfternoon().get(i).isChecked()+"");
+                values.put("content", today.getAfternoon().get(i).getText());
+                data.insert("today", null, values);
+            }
+            for (int i = 0; i < today.getEvening().size(); i++) {
+                values.put("time", "晚上");
+                values.put("time_id", i + 1 + "e");
+                values.put("checked", today.getEvening().get(i).isChecked()+"");
+                values.put("content", today.getEvening().get(i).getText());
+                data.insert("today", null, values);
+            }
+        }
+    }
 }
