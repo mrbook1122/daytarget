@@ -114,10 +114,12 @@ public class TomorrowFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 if (actionButton1.getVisibility() == View.INVISIBLE) {
+                    actionButton.setImageResource(R.drawable.cha);
                     actionButton1.setVisibility(View.VISIBLE);
                     actionButton2.setVisibility(View.VISIBLE);
                     actionButton3.setVisibility(View.VISIBLE);
                 } else {
+                    actionButton.setImageResource(R.drawable.plu);
                     actionButton1.setVisibility(View.INVISIBLE);
                     actionButton2.setVisibility(View.INVISIBLE);
                     actionButton3.setVisibility(View.INVISIBLE);

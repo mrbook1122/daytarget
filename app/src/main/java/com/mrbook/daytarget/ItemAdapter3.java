@@ -2,6 +2,7 @@ package com.mrbook.daytarget;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.List;
@@ -39,15 +41,15 @@ public class ItemAdapter3 extends RecyclerView.Adapter<ItemAdapter3.ViewHolder> 
         db.update("day", values, "dateid = ? and time_id = ?", new String[] {day.getDate(),
                 position+1+"e"});
         if (checked) {
-            holder.textView.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.textView.setTextColor(Color.parseColor("#cdcdcd"));
             holder.checkBox.setChecked(checked);
         } else {
-            holder.textView.getPaint().setFlags(Paint.DEV_KERN_TEXT_FLAG);
-            holder.checkBox.setChecked(false);
+            holder.textView.setTextColor(Color.parseColor("#000000"));
+            holder.checkBox.setChecked(checked);
         }
         holder.textView.setText(evening.get(position).getText());
         final int ps = position;
-        final boolean checkBox_checked = holder.checkBox.isChecked();
+        final boolean checkBox_checked = checked;
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

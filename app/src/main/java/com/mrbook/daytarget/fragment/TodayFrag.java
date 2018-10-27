@@ -113,11 +113,12 @@ public class TodayFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 if (actionButton1.getVisibility() == View.INVISIBLE) {
-                    actionButton.setImageDrawable();
+                    actionButton.setImageResource(R.drawable.cha);
                     actionButton1.setVisibility(View.VISIBLE);
                     actionButton2.setVisibility(View.VISIBLE);
                     actionButton3.setVisibility(View.VISIBLE);
                 } else {
+                    actionButton.setImageResource(R.drawable.plu);
                     actionButton1.setVisibility(View.INVISIBLE);
                     actionButton2.setVisibility(View.INVISIBLE);
                     actionButton3.setVisibility(View.INVISIBLE);
@@ -128,18 +129,21 @@ public class TodayFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 initAddButton("上午");
+                actionButton.setImageResource(R.drawable.plu);
             }
         });
         actionButton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 initAddButton("下午");
+                actionButton.setImageResource(R.drawable.plu);
             }
         });
         actionButton3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 initAddButton("晚上");
+                actionButton.setImageResource(R.drawable.plu);
             }
         });
     }
